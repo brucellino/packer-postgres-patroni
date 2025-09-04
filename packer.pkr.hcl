@@ -8,8 +8,33 @@ packer {
   }
 }
 
+variable "pkg_deps" {
+  type = list(string)
+  default = [
+    "build-base", # Required for compilers
+    "linux-headers", # Required for building the pip packages
+    "python3-dev", # Required for building some pip packages
+    "pipx", # Required for installation
+    ]
+}
+
+variable "patroni_pkgs" {
+  description = "Patroni extras you want in the deployment"
+  type = list(string)
+default = [
+  "consul",
+  "raft"
+]
+}
+
+variable "upstream_tag" {
+  type = string
+  description = "Tag of the upstream tag we are building from"
+  default = "16-alpine"
+}
+
 source "docker" "patroni" {
-  image = "postgres:16-alpine"
+  image = "postgres:${var.upstream_tag}"
   commit = true
   run_command = ["-d", "-i", "-t", "--entrypoint=/bin/bash", "--", "{{.Image}}"]
   changes = [
@@ -23,13 +48,13 @@ build {
   provisioner "shell" {
     inline = [
       "apk update",
-      "apk add pipx build-base linux-headers py3-virtualenv python3-dev",
-      "pipx install patroni[consul,raft]"
+      "apk add ${join(" ", var.pkg_deps)}",
+      "pipx install patroni[${join(",", var.patroni_pkgs)}]"
     ]
-
   }
+
   post-processor "docker-tag" {
     repository = "ghcr.io/brucellino/postgres-patroni"
-    tags = ["17-alpine"]
+    tags = ["${var.upstream_tag}"]
   }
 }
