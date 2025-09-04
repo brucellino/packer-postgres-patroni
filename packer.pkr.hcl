@@ -21,10 +21,15 @@ build {
   name = "posgres-patroni"
   sources = ["docker.docker.patroni"]
   provisioner "shell" {
-      inline = [
-        "apk update",
-        "apk add pipx build-base linux-headers py3-virtualenv python3-dev",
-        "pipx install patroni[consul,raft]"
-      ]
+    inline = [
+      "apk update",
+      "apk add pipx build-base linux-headers py3-virtualenv python3-dev",
+      "pipx install patroni[consul,raft]"
+    ]
+
+  }
+  post-processor "docker-tag" {
+    repository = "ghcr.io/brucellino/postgres-patroni"
+    tags = ["17-alpine"]
   }
 }
