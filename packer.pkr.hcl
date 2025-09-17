@@ -14,8 +14,9 @@ variable "pkg_deps" {
     "build-base",    # Required for compilers
     "linux-headers", # Required for building the pip packages
     "python3-dev",   # Required for building some pip packages
+    "py3-pip",   #
+    "py3-psycopg2", # Required for patroni
     "pipx",          # Required for installation
-    "py3-psycopg2",      # Required for patroni
   ]
 }
 
@@ -64,9 +65,17 @@ build {
   provisioner "shell" {
     inline = [
       "apk update",
-      "apk add ${join(" ", var.pkg_deps)}",
-      "pipx install patroni[${join(",", var.patroni_pkgs)}]"
+      "apk add ${join(" ", var.pkg_deps)}"
     ]
+  }
+  # Create virtualenv and add dependencies
+  provisioner "shell" {
+    inline = [
+      "python3 -m venv /root/patroni",
+      "source /root/patroni/bin/activate",
+      "pip install psycopg2 patroni[${join(",", var.patroni_pkgs)}]"
+    ]
+
   }
   post-processors {
     post-processor "docker-tag" {
@@ -80,7 +89,4 @@ build {
       login_password = "${var.password}"
     }
   }
-
-
-
 }
