@@ -15,6 +15,7 @@ variable "pkg_deps" {
     "linux-headers", # Required for building the pip packages
     "python3-dev",   # Required for building some pip packages
     "pipx",          # Required for installation
+    "py3-psycopg2",      # Required for patroni
   ]
 }
 
@@ -30,7 +31,7 @@ variable "patroni_pkgs" {
 variable "upstream_tag" {
   type        = string
   description = "Tag of the upstream tag we are building from"
-  default     = "16-alpine"
+  default     = "17-alpine"
 }
 
 variable "username" {
@@ -43,7 +44,7 @@ variable "password" {
   type = string
   sensitive = true
   description = "Password to push to the container registry"
-  default = env("GITHUB_PASSWORD")
+  default = env("GITHUB_TOKEN")
 }
 
 source "docker" "patroni" {
@@ -51,7 +52,9 @@ source "docker" "patroni" {
   commit      = true
   run_command = ["-d", "-i", "-t", "--entrypoint=/bin/bash", "--", "{{.Image}}"]
   changes = [
-
+    "LABEL org.opencontainers.image.source=https://github.com/brucellino/packer-postgres-patroni",
+    "LABEL org.opencontainers.image.description='Patroni-managed postgres image'",
+    "ENTRYPOINT [\"/root/.local/patroni\"]"
   ]
 }
 
@@ -65,15 +68,19 @@ build {
       "pipx install patroni[${join(",", var.patroni_pkgs)}]"
     ]
   }
-
-  post-processor "docker-tag" {
-    repository = "ghcr.io/brucellino/postgres-patroni"
-    tags       = ["${var.upstream_tag}"]
+  post-processors {
+    post-processor "docker-tag" {
+      repository = "ghcr.io/brucellino/postgres-patroni"
+      tags       = ["${var.upstream_tag}"]
+    }
+    post-processor "docker-push" {
+      login = true
+      login_server = "ghcr.io"
+      login_username = "${var.username}"
+      login_password = "${var.password}"
+    }
   }
 
-  post-processor "docker-push" {
-    login = true
-    login_username = "${var.username}"
-    login_password = "${var.password}"
-  }
+
+
 }
