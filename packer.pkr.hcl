@@ -39,6 +39,7 @@ variable "username" {
   type = string
   description = "username to log into the registry"
   default = env("GITHUB_USERNAME")
+  # default = vault()
 }
 
 variable "password" {
@@ -46,6 +47,7 @@ variable "password" {
   sensitive = true
   description = "Password to push to the container registry"
   default = env("GITHUB_TOKEN")
+  # default = vault()
 }
 
 source "docker" "patroni" {
@@ -55,7 +57,9 @@ source "docker" "patroni" {
   changes = [
     "LABEL org.opencontainers.image.source=https://github.com/brucellino/packer-postgres-patroni",
     "LABEL org.opencontainers.image.description='Patroni-managed postgres image'",
-    "ENTRYPOINT [\"/root/.local/patroni\"]"
+    "USER postgres",
+    "WORKDIR /patroni",
+    "ENTRYPOINT [\"/patroni/bin/patroni\"]"
   ]
 }
 
@@ -71,8 +75,8 @@ build {
   # Create virtualenv and add dependencies
   provisioner "shell" {
     inline = [
-      "python3 -m venv /root/patroni",
-      "source /root/patroni/bin/activate",
+      "python3 -m venv /patroni",
+      "source /patroni/bin/activate",
       "pip install psycopg2 patroni[${join(",", var.patroni_pkgs)}]"
     ]
 
