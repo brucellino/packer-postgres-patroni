@@ -12,6 +12,7 @@ variable "pkg_deps" {
   type = list(string)
   default = [
     "build-base",    # Required for compilers
+    "musl-locales", # Required for locales
     "linux-headers", # Required for building the pip packages
     "python3-dev",   # Required for building some pip packages
     "py3-pip",   #
