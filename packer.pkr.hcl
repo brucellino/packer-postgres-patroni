@@ -35,19 +35,8 @@ variable "upstream_tag" {
   default     = "17-alpine"
 }
 
-variable "username" {
-  type = string
-  description = "username to log into the registry"
-  default = env("GITHUB_USERNAME")
-  # default = vault()
-}
-
-variable "password" {
-  type = string
-  sensitive = true
-  description = "Password to push to the container registry"
-  default = env("GITHUB_TOKEN")
-  # default = vault()
+locals {
+  github = vault("hashiatho.me-v2/data/github", "packer_token")
 }
 
 source "docker" "patroni" {
@@ -89,8 +78,8 @@ build {
     post-processor "docker-push" {
       login = true
       login_server = "ghcr.io"
-      login_username = "${var.username}"
-      login_password = "${var.password}"
+      login_username = "brucellino"
+      login_password = "${local.github}"
     }
   }
 }
