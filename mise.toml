@@ -1,0 +1,5 @@
+[tools]
+python = "3.10"
+packer = "1.14.2"
+[tasks]
+install = "pip install patroni[consul] psycopg2 psycopg2-binary"
