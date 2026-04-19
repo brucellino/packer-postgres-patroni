@@ -1,3 +1,6 @@
+name: Build
+permissions:
+  id-token: write # Request a JWT from Github
 on:
   push:
     branches:
@@ -6,7 +9,7 @@ on:
     branches:
       - main
 jobs:
-  - name: Build AMD64
+  AMD64:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -16,8 +19,7 @@ jobs:
         with:
           oauth-client-id: ${{ secrets.TAILSCALE_OAUTH_CLIENT_ID }}
           oauth-secret: ${{ secrets.TS_AUDIENCE }}
-          tags:
-            - tag: ci
+          tags: tag:ci
       - name: Build
         run: |
           packer build
