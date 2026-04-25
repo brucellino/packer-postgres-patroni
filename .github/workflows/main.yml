@@ -22,4 +22,4 @@ jobs:
           tags: tag:ci
       - name: Build
         run: |
-          packer build
+          packer build .
