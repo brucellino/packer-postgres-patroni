@@ -22,4 +22,5 @@ jobs:
           tags: tag:ci
       - name: Build
         run: |
+          packer init .
           packer build .
