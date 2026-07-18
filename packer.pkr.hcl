@@ -18,6 +18,7 @@ variable "pkg_deps_apk" {
     "py3-pip",   #
     "py3-psycopg2", # Required for patroni
     "pipx",          # Required for installation
+    "postgresql-pgvector"
   ]
 }
 
@@ -36,7 +37,7 @@ locals {
 }
 
 source "docker" "patroni-amd64" {
-  image       = "postgres:17-alpine"
+  image       = "postgres:18.4-alpine"
   commit      = true
   run_command = ["-d", "-i", "-t", "--entrypoint=/bin/bash", "--", "{{.Image}}"]
   changes = [
@@ -49,7 +50,7 @@ source "docker" "patroni-amd64" {
 }
 
 source "docker" "patroni-arm64" {
-  image       = "arm64v8/postgres:17-alpine"
+  image       = "arm64v8/postgres:18.4-alpine"
   platform    = "linux/arm64"
   commit      = true
   run_command = ["-d", "-i", "-t", "--entrypoint=/bin/bash", "--", "{{.Image}}"]
@@ -83,7 +84,7 @@ build {
   post-processors {
     post-processor "docker-tag" {
       repository = "ghcr.io/brucellino/postgres-patroni"
-      tags       = ["17.9-alpine"]
+      tags       = ["18.4-alpine"]
     }
     post-processor "docker-push" {
       login = true
@@ -115,7 +116,7 @@ build {
   post-processors {
     post-processor "docker-tag" {
       repository = "ghcr.io/brucellino/postgres-patroni"
-      tags       = ["17.9"]
+      tags       = ["18.4"]
     }
     post-processor "docker-push" {
       login = true
