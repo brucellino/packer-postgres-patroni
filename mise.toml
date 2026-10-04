@@ -4,7 +4,7 @@ auto_install = true
 [tools]
 prek = "0.4.10"
 python = "3.10"
-packer = "1.15.4"
+packer = "1.16.1"
 
 [tasks]
 install = "pip install patroni[consul] psycopg2 psycopg2-binary"
