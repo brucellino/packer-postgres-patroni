@@ -2,7 +2,7 @@
 auto_install = true
 
 [tools]
-prek = "0.4.10"
+prek = "0.5.4"
 python = "3.10"
 packer = "1.15.4"
 
